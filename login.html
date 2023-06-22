@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang = "ru">
+<head>
+	<meta charset = "UTF-8">
+	<title>HeatMap</title>
+	<meta name = 'viewport' content = 'width = device-width, initial-scale = 1' />
+    <script src = 'https://api.tiles.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
+    <link href = 'https://api.tiles.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel = 'stylesheet' />
+    <style>
+		body {
+			margin: 0;
+			padding: 0;
+		}
+
+		#map {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			width: 100%;
+		}
+    </style>
+</head>
+<body>
+    <div>
+		<form id = "signup">
+			<input type = "submit" value = "Регистрация">
+		</form>
+		<form id = "signin">
+			<input type = "submit" value = "Логин">
+		</form>
+        <form id = "regForm" style = "display: none;">
+			<h3>Регистрация</h3><br>
+            <label for = "nlog">Логин</label>
+            <input type = "text" id = "nlog" placeholder = "Введите логин" autocomplete = "off">
+            <label for = "npass">Пароль</label>
+            <input type = "text" id = "npass" placeholder = "Введите пароль" autocomplete = "off">
+            <input type = "submit" value = "Регистрация">
+        </form>
+		<div id = "erreg" style = "display: none;"></div>
+        <form id = "logForm" style = "display: none;">
+			<h3>Вход в систему</h3><br>
+            <label for = "log">Логин</label>
+            <input type = "text" id = "log" placeholder = "Введите логин" autocomplete = "off">
+            <label for = "pass">Пароль</label>
+            <input type = "text" id = "pass" placeholder = "Введите пароль" autocomplete = "off">
+            <input type = "submit" value = "Логин">
+        </form>
+        <div id = "erlogin" style = "display: none;"></div>
+        <div id = "login" style = "display: none;"></div>
+        <form id = "posForm" style = "display: none;">
+			<h3>Ваше местоположение</h3>
+            <label for = "lat">Широта</label>
+            <textarea name = "lat" id = "lat" placeholder = "Введите широту"></textarea>
+			<br><input type = "radio" name = "lat" id = "north" value = "north">Север<br>
+			<input type = "radio" name = "lat" id = "south" value = "south">Юг<br>
+            <label for = "long">Долгота</label>
+            <textarea name = "long" id = "long" placeholder = "Введите долготу"></textarea>
+			<br><input type = "radio" name = "long" id = "east" value = "east">Восток<br>
+			<input type = "radio" name = "long" id = "west" value = "west">Запад<br>
+            <br><input type = "submit" value = "Указать/изменить свлои координаты">
+        </form>
+		<form id = "logout" style = "display: none;">
+			<input id = "loginout" type = "submit" value = "Выйти">
+		</form>
+    </div>
+	<script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src = "/socket.io/socket.io.js"></script>
+	<script>
+		let min  =  1;
+		let max  =  6;
+		let random  =  Math.floor(Math.random() * (max - min)) + min;
+
+		let alertClass;
+		switch (random) {
+			case 1:
+				alertClass  =  'secondary';
+				break;
+			case 2:
+				alertClass  =  'danger';
+				break;
+			case 3:
+				alertClass  =  'success';
+				break;
+			case 4:
+				alertClass  =  'warning';
+				break;
+			case 5:
+				alertClass  =  'info';
+				break;
+			case 6:
+				alertClass  =  'light';
+				break;
+		}
+
+		$(function() {
+			let socket    = io.connect();
+			let $regForm  = $("#regForm");
+			let $logForm  = $("#logForm");
+			let $posForm  = $("#posForm");
+			let $logout   = $("#logout");
+			let $nlogin   = $("#nlog");
+			let $npass    = $("#npass");
+			let $login    = $("#log");
+			let $pass     = $("#pass");
+			let $lat      = $("#lat");
+			let $long     = $("#long");
+            let $log      = $("#login");
+            let $erreg    = $("#erreg");
+            let $erlogin  = $("#erlogin");
+			let $signin   = $("#signin");
+			let $signup   = $("#signup");
+			let $loginout = $("#loginout");
+			let $latp;
+			let $longp;			
+            
+			$signin.submit(function(event) {
+				event.preventDefault();
+				document.getElementById("signup").style.display = "block";
+				document.getElementById("signin").style.display = "none";
+				document.getElementById("regForm").style.display = "none";
+				document.getElementById("logForm").style.display = "block";
+				document.getElementById("posForm").style.display = "none";
+				document.getElementById("erreg").style.display = "none";
+				document.getElementById("erlogin").style.display = "none";
+				document.getElementById("login").style.display = "none";
+				document.getElementById("logout").style.display = "none";
+			});
+			$signup.submit(function(event) {
+				event.preventDefault();
+				document.getElementById("signup").style.display = "none";
+				document.getElementById("signin").style.display = "block";
+				document.getElementById("regForm").style.display = "block";
+				document.getElementById("logForm").style.display = "none";
+				document.getElementById("posForm").style.display = "none";
+				document.getElementById("erreg").style.display = "none";
+				document.getElementById("erlogin").style.display = "none";
+				document.getElementById("login").style.display = "none";
+				document.getElementById("logout").style.display = "none";
+			});
+			document.getElementById('loginout').onsubmit = function() {
+				document.getElementById("select").style.display = "block";
+				document.getElementById("regForm").style.display = "none";
+				document.getElementById("logForm").style.display = "none";
+				document.getElementById("posForm").style.display = "none";
+				document.getElementById("erreg").style.display = "none";
+				document.getElementById("erlogin").style.display = "none";
+				document.getElementById("login").style.display = "none";
+				document.getElementById("logout").style.display = "none";
+			}
+			$regForm.submit(function(event) {
+				event.preventDefault();
+				socket.emit('send user', {nlogin: $nlogin.val(), npass: $npass.val()});
+			});
+			$logForm.submit(function(event) {
+				event.preventDefault();
+				socket.emit('send login', {login: $login.val(), pass: $pass.val()});
+			});
+			$posForm.submit(function(event) {
+				event.preventDefault();
+				$latp = document.querySelector('input[name="lat"]:checked').value;
+				$longp = document.querySelector('input[name="long"]:checked').value;
+				socket.emit('send pos', {login: $login.val(), lat: $lat.val(), long: $long.val(),
+										latp: $latp == "north" ? 1 : 2, longp: $longp == "east" ? 1 : 2});
+			});
+
+			socket.on('add user', function(data) {
+				if (data.flg)
+				{
+					document.getElementById("regForm").style.display = "none";
+					document.getElementById("logForm").style.display = "block";
+					document.getElementById("posForm").style.display = "none";
+					document.getElementById("erreg").style.display = "none";
+					document.getElementById("erlogin").style.display = "none";
+					document.getElementById("login").style.display = "none";
+				} else {
+					erreg.innerHTML = '';
+					$erreg.append(`<p style = "color: #FF0000;>This login ${data.login} already exists.</p>`);
+					document.getElementById("erreg").style.display = "block";
+				}
+			});
+            socket.on('add login', function(data) {
+				if (data.flg) {
+					document.getElementById("regForm").style.display = "none";
+					document.getElementById("logForm").style.display = "none";
+					document.getElementById("posForm").style.display = "block";
+					document.getElementById("erreg").style.display = "none";
+					document.getElementById("erlogin").style.display = "none";
+					document.getElementById("login").style.display = "block";
+					document.getElementById("logout").style.display = "block";
+					$log.innerHTML = '';
+					$log.append(`<p>You logged as ${data.login}.</p>`);
+				} else {
+					erlogin.innerHTML = '';
+					$erlogin.append(`<p style = "color: #FF0000;">Wrong login or password</p>`);
+					document.getElementById("erlogin").style.display = "block";
+				}
+			});
+			socket.on('add pos', function(data) {
+				if (data.flg){
+					$log.innerHTML = '';
+					$log.append(`<p>You logged as ${data.login}. You edit your world coodinate.</p>`);
+				}
+			})
+
+		});
+	</script>
+</body>
+</html>
