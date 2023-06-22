@@ -89,24 +89,44 @@ let textDB;
 io.on('connection', function(socket) {
 	console.log("Успешное соединение");
 	connections.push(socket);
-	fs.readFile('DB', 'utf8', (err, data) => {
+	// fs.open('DB.txt', 'r', function (err, f) {
+	// 	console.log(f);
+	// 	console.log('Saved!');
+	// });
+	// let file_descriptor = fs.openSync("DB.txt");
+	fs.readFile('DB.txt', 'utf8', (err, data) => {
 		if (err) {
 			throw err;
 		}
-		console.log(data);
-		let mas = JSON.parse(data);
-		let count = base[0];
-		for (let i = 0; i < count; i += 6) {
-			let log = base[i + 1],
-				pass = base[i + 2],
-				lat = base[i + 2],
-				latp = base[i + 2],
-				long = base[i + 2],
-				longp = base[i + 2];
+		// console.log(data);
+		
+		let mas = data.split(/\s\n/);
+		let count = Number(mas[0]);
+		console.log(mas);
+		for (let i = 0; i < count; i++) {
+			let user = mas[i + 1].split(' ');
+			let log   = user[0],
+				pass  = user[1],
+				lat   = user[2],
+				latp  = user[3],
+				long  = user[4],
+				longp = user[5];
 
-			data.set(log, [pass, lat, latp, long, longp]);
+			//console.log(`${typeof log}`);
+
+			base.set(log, [pass, lat, latp, long, longp]);
 		}
+		console.log(base);
+		// console.log(JSON.stringify(data));
 	});
+	// console.log("!!!!!!!!!!!!!");
+	// fs.close(file_descriptor, (err) => {
+	// 	if (err)
+	// 		console.error('Failed to close file', err);
+	// 	else {
+	// 		console.log("\n> File Closed successfully");
+	// 	}
+	// });
 
 	socket.on('disconnect', function(data) {
 		connections.splice(connections.indexOf(socket), 1);
@@ -114,10 +134,10 @@ io.on('connection', function(socket) {
 		textDB = `${base.size}`;
 		if (base.size != 0) {
 			for (let [key, [a, b, c, d, e]] of base) {
-				if (entry === undefined) {
+				if (key === undefined) {
 					break;
 				}
-				textDB += `\n${a} ${b} ${c} ${d} ${e}`;
+				textDB += `\n${key} ${a} ${b} ${c} ${d} ${e}`;
 			}
 		}
 		fs.writeFile("DB.txt", textDB, function(err) {
@@ -125,12 +145,12 @@ io.on('connection', function(socket) {
 				return console.log(err);
 			}
 			console.log("The file was saved!");
-		}); 
+		});
 	});
 	
 	socket.on('send user', function(data) {
 		data.flg = addUser(data.nlogin, data.npass);
-		io.sockets.emit('add user', {flg: data.flg});
+		io.sockets.emit('add user', {flg: data.flg, login: data.login});
 	});
 	socket.on('send login', function(data) {
 		data.flg = signIn(data.login, data.pass);
@@ -138,6 +158,6 @@ io.on('connection', function(socket) {
 	});
 	socket.on('send pos', function(data) {
 		data.flg = addPos(data.login, data.lat, data.long, data.latp, data.longp);
-		io.sockets.emit('add pos', {flg: data.flg});
+		io.sockets.emit('add pos', {flg: data.flg, login: data.login});
 	});
 });
