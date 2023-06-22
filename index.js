@@ -71,7 +71,7 @@ let fs = require('fs');
 
 let io = sock(server);
 
-const host = "192.168.30.91";
+const host = "192.168.0.2";
 const port = 3000;
 server.listen(port, host, () => {
 	console.log(`Listen to http://${host}:${port}`);
