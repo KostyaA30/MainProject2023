@@ -100,11 +100,13 @@ io.on('connection', function(socket) {
 		}
 		// console.log(data);
 		
-		let mas = data.split(/\s\n/);
+		let mas = data.split('\n');
 		let count = Number(mas[0]);
 		console.log(mas);
+		console.log(count);
 		for (let i = 0; i < count; i++) {
 			let user = mas[i + 1].split(' ');
+			console.log(mas[i]);
 			let log   = user[0],
 				pass  = user[1],
 				lat   = user[2],

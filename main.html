@@ -28,14 +28,14 @@
       mapboxgl.accessToken = 'pk.eyJ1Ijoia29zdHlhMzAiLCJhIjoiY2xqNnY5azEzMGNzazNjb2I1YmxmNXVkMCJ9.kNuwj6ZpGy6iLOcLGjet-Q';
       const map = new mapboxgl.Map({
         container: 'map',
-        style: 'mapbox://styles/mapbox/dark-v11',
+        style: 'mapbox://styles/kostya30/clj6vp5lr004601pi6eb16w31', // mapbox://styles/mapbox/dark-v11',
         center: [-79.999732, 40.4374],
         zoom: 11
       });
       map.on('load', () => {
         map.addSource('trees', {
           'type': 'geojson',
-          'data': './trees.geojson'
+          'data': '/trees.geojson'
         });
 
         map.addLayer(
