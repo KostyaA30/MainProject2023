@@ -1,39 +1,71 @@
 {
-    "type": "FeatureCollection",
-    "features": [
-        {
-            "type": "Feature",
-            "geometry": {"type": "Point", "coordinates": [102.0, 0.5]},
-            "properties": {"prop0": "value0"}
-        },
-        {
-            "type": "Feature",
-            "geometry": {
-                "type": "LineString",
-                "coordinates": [
-                    [102.0, 0.0], [103.0, 1.0], [104.0, 0.0], [105.0, 1.0]
-                ]
-            },
-            "properties": {
-                "prop0": "value0",
-                "prop1": 0.0
-            }
-        },
-        {
-            "type": "Feature",
-            "geometry": {
-                "type": "Polygon",
-                "coordinates": [
-                    [
-                        [100.0, 0.0], [101.0, 0.0], [101.0, 1.0],
-                        [100.0, 1.0], [100.0, 0.0]
-                    ]
-                ]
-            },
-            "properties": {
-                "prop0": "value0",
-                "prop1": {"this": "that"}
-            }
-        }
-    ]
+	"type": "FeatureCollection",
+	"features": [
+		{
+			"type": "Feature",
+			"properties": {
+				"customProperty": 1,
+				"dbh": "a: 30.3, 59.97"
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [30.3, 59.97]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"customProperty": 1,
+				"dbh": "KA2: 30.278, 59.9431"
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [30.278, 59.9431]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"customProperty": 1,
+				"dbh": "123: 30, 30"
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [30, 30]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"customProperty": 1,
+				"dbh": "a2: 30.3, 60"
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [30.3, 60]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"customProperty": 1,
+				"dbh": "b: 60, 30.2"
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [60, 30.2]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"customProperty": 1,
+				"dbh": "GP4: 60, 30"
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [60, 30]
+			}
+		}
+	]
 }

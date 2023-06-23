@@ -27,6 +27,11 @@ let DB, sizeOfUsers = 0;
 // });
 
 function addUser(login, pass) {
+	if (login == undefined || pass == undefined || login == null || pass == null ||
+		login == "" || pass == "") {
+		console.log('Not null login or pass');
+		return 0;
+	}
     if (!base.has(login)) {
         base.set(login, [pass, undefined, undefined, undefined, undefined]);
         sizeOfUsers++;
@@ -38,6 +43,11 @@ function addUser(login, pass) {
 }
 
 function addPos(login, lat, long, latp, longp) {
+	if (lat == undefined || long == undefined || lat == '' || long == ''
+	|| long == null | lat == null) {
+		lat = 60;
+		long = 30;
+	}
     if (base.has(login)) {
         let obj = base.get(login);
         base.set(login, [obj[0], lat, long, latp, longp]);
@@ -71,7 +81,7 @@ let fs = require('fs');
 
 let io = sock(server);
 
-const host = "192.168.0.2";
+const host = "192.168.30.91";
 const port = 3000;
 server.listen(port, host, () => {
 	console.log(`Listen to http://${host}:${port}`);
@@ -84,7 +94,7 @@ app.get('/', function(request, respons) {
 
 connections = [];
 
-let textDB;
+let textDB, geoDB;
 
 io.on('connection', function(socket) {
 	console.log("Успешное соединение");
@@ -102,11 +112,11 @@ io.on('connection', function(socket) {
 		
 		let mas = data.split('\n');
 		let count = Number(mas[0]);
-		console.log(mas);
-		console.log(count);
+		// console.log(mas);
+		// console.log(count);
 		for (let i = 0; i < count; i++) {
 			let user = mas[i + 1].split(' ');
-			console.log(mas[i]);
+			// console.log(mas[i]);
 			let log   = user[0],
 				pass  = user[1],
 				lat   = user[2],
@@ -118,7 +128,7 @@ io.on('connection', function(socket) {
 
 			base.set(log, [pass, lat, latp, long, longp]);
 		}
-		console.log(base);
+		// console.log(base);
 		// console.log(JSON.stringify(data));
 	});
 	// console.log("!!!!!!!!!!!!!");
@@ -148,15 +158,59 @@ io.on('connection', function(socket) {
 			}
 			console.log("The file was saved!");
 		});
+		geoDB =
+`{
+	"type": "FeatureCollection",
+	"features": [`;
+		if (base.size != 0) {
+			let i = 0;
+			for (let [key, [a, b, c, d, e]] of base) {
+				i++;
+				if (key == undefined ||
+					a == undefined ||
+					b == undefined ||
+					c == undefined ||
+					d == undefined ||
+					e == undefined) {
+					continue;
+				}
+				geoDB +=`
+		{
+			"type": "Feature",
+			"properties": {
+				"customProperty": 1,
+				"dbh": "${key}: ${c}, ${b}"
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": `;
+				geoDB += `[${(e == 1) ? c : -c}, ${(d == 1) ? b : -b}]`;
+				geoDB += `
+			}
+		}`;
+				if (i != base.size) {
+					geoDB += `,`;
+				}
+			}
+			geoDB += `
+	]
+}`;
+		}
+		fs.writeFile("trees.geojson", geoDB, function(err) {
+			if (err) {
+				return console.log(err);
+			}
+			console.log("The geofile saved!");
+		})
 	});
 	
 	socket.on('send user', function(data) {
 		data.flg = addUser(data.nlogin, data.npass);
-		io.sockets.emit('add user', {flg: data.flg, login: data.login});
+		io.sockets.emit('add user', {flg: data.flg, login: data.nlogin});
 	});
 	socket.on('send login', function(data) {
 		data.flg = signIn(data.login, data.pass);
-		io.sockets.emit('add login', {flg: data.flg});
+		io.sockets.emit('add login', {flg: data.flg, login: data.login});
 	});
 	socket.on('send pos', function(data) {
 		data.flg = addPos(data.login, data.lat, data.long, data.latp, data.longp);

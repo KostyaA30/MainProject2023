@@ -1,0 +1,28 @@
+* {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 105%;
+}
+
+body {
+    display: flex;
+    justify-content: space-between;
+}
+
+form {
+    background-color: aquamarine;
+    padding: 20px;
+    margin: 20px;
+    display: inline-block;
+}
+
+p {
+    padding-left: 20px;
+}
+
+input {
+    position: center;
+    padding: 5px;
+    background-color: antiquewhite;
+    border: 0.5px solid black;
+    border-radius: 5px;
+}

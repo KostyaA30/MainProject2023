@@ -6,6 +6,7 @@
 	<meta name = 'viewport' content = 'width = device-width, initial-scale = 1' />
     <script src = 'https://api.tiles.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
     <link href = 'https://api.tiles.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel = 'stylesheet' />
+	<link rel = "stylesheet" type = "text/css" href = "/styles.css" />
     <style>
 		body {
 			margin: 0;
@@ -29,33 +30,37 @@
 			<input type = "submit" value = "Логин">
 		</form>
         <form id = "regForm" style = "display: none;">
-			<h3>Регистрация</h3><br>
+			<nobr>
+			<h3>Регистрация</h3>
             <label for = "nlog">Логин</label>
             <input type = "text" id = "nlog" placeholder = "Введите логин" autocomplete = "off">
             <label for = "npass">Пароль</label>
-            <input type = "text" id = "npass" placeholder = "Введите пароль" autocomplete = "off">
+            <input type = "password" id = "npass" placeholder = "Введите пароль" autocomplete = "new-password">
             <input type = "submit" value = "Регистрация">
+			</nobr>
         </form>
 		<div id = "erreg" style = "display: none;"></div>
         <form id = "logForm" style = "display: none;">
-			<h3>Вход в систему</h3><br>
+			<nobr>
+			<h3>Вход в систему</h3>
             <label for = "log">Логин</label>
             <input type = "text" id = "log" placeholder = "Введите логин" autocomplete = "off">
             <label for = "pass">Пароль</label>
-            <input type = "text" id = "pass" placeholder = "Введите пароль" autocomplete = "off">
+            <input type = "password" id = "pass" placeholder = "Введите пароль" autocomplete = "new-password">
             <input type = "submit" value = "Логин">
+			</nobr>
         </form>
         <div id = "erlogin" style = "display: none;"></div>
         <div id = "login" style = "display: none;"></div>
         <form id = "posForm" style = "display: none;">
 			<h3>Ваше местоположение</h3>
             <label for = "lat">Широта</label>
-            <textarea name = "lat" id = "lat" placeholder = "Введите широту"></textarea>
-			<br><input type = "radio" name = "lat" id = "north" value = "north">Север<br>
+            <input type = "text" name = "lat" id = "lat" placeholder = "Введите широту"></textarea>
+			<br><input type = "radio" name = "lat" id = "north" value = "north" checked>Север<br>
 			<input type = "radio" name = "lat" id = "south" value = "south">Юг<br>
             <label for = "long">Долгота</label>
-            <textarea name = "long" id = "long" placeholder = "Введите долготу"></textarea>
-			<br><input type = "radio" name = "long" id = "east" value = "east">Восток<br>
+            <input type = "text" name = "long" id = "long" placeholder = "Введите долготу"></textarea>
+			<br><input type = "radio" name = "long" id = "east" value = "east" checked>Восток<br>
 			<input type = "radio" name = "long" id = "west" value = "west">Запад<br>
             <br><input type = "submit" value = "Указать/изменить свлои координаты">
         </form>
@@ -63,9 +68,15 @@
 			<input id = "loginout" type = "submit" value = "Выйти">
 		</form>
     </div>
+    <script src = "/lnglat.js"></script>
 	<script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<script src = "/socket.io/socket.io.js"></script>
 	<script>
+		let $lat      = $("#lat");
+		let $long     = $("#long");
+		
+		window.longitude = 0, window.latitude = 0, window.olong = 0, window.olat = 0;
+
 		let min  =  1;
 		let max  =  6;
 		let random  =  Math.floor(Math.random() * (max - min)) + min;
@@ -92,6 +103,17 @@
 				break;
 		}
 
+		window.setInterval(() => {
+			if (window.latitude != window.olat) {
+				window.olat = window.latitude;
+				$lat.val(window.latitude);
+			}
+			if (window.longitude != window.olong) {
+				window.olong = window.longitude;
+				$long.val(window.longitude);
+			}
+		}, 500);
+
 		$(function() {
 			let socket    = io.connect();
 			let $regForm  = $("#regForm");
@@ -102,8 +124,6 @@
 			let $npass    = $("#npass");
 			let $login    = $("#log");
 			let $pass     = $("#pass");
-			let $lat      = $("#lat");
-			let $long     = $("#long");
             let $log      = $("#login");
             let $erreg    = $("#erreg");
             let $erlogin  = $("#erlogin");
@@ -111,7 +131,7 @@
 			let $signup   = $("#signup");
 			let $loginout = $("#loginout");
 			let $latp;
-			let $longp;			
+			let $longp;
             
 			$signin.submit(function(event) {
 				event.preventDefault();
@@ -138,7 +158,8 @@
 				document.getElementById("logout").style.display = "none";
 			});
 			document.getElementById('loginout').onsubmit = function() {
-				document.getElementById("select").style.display = "block";
+				document.getElementById("signup").style.display = "block";
+				document.getElementById("signin").style.display = "block";
 				document.getElementById("regForm").style.display = "none";
 				document.getElementById("logForm").style.display = "none";
 				document.getElementById("posForm").style.display = "none";
@@ -166,6 +187,8 @@
 			socket.on('add user', function(data) {
 				if (data.flg)
 				{
+					document.getElementById("signup").style.display = "block";
+					document.getElementById("signin").style.display = "none";
 					document.getElementById("regForm").style.display = "none";
 					document.getElementById("logForm").style.display = "block";
 					document.getElementById("posForm").style.display = "none";
@@ -173,13 +196,15 @@
 					document.getElementById("erlogin").style.display = "none";
 					document.getElementById("login").style.display = "none";
 				} else {
-					erreg.innerHTML = '';
+					erreg.html('');
 					$erreg.append(`<p style = "color: #FF0000;>This login ${data.login} already exists.</p>`);
 					document.getElementById("erreg").style.display = "block";
 				}
 			});
             socket.on('add login', function(data) {
 				if (data.flg) {
+					document.getElementById("signup").style.display = "none";
+					document.getElementById("signin").style.display = "none";
 					document.getElementById("regForm").style.display = "none";
 					document.getElementById("logForm").style.display = "none";
 					document.getElementById("posForm").style.display = "block";
@@ -187,18 +212,25 @@
 					document.getElementById("erlogin").style.display = "none";
 					document.getElementById("login").style.display = "block";
 					document.getElementById("logout").style.display = "block";
-					$log.innerHTML = '';
-					$log.append(`<p>You logged as ${data.login}.</p>`);
+					// $log.html('');
+					// $log.append(`<p>You logged as ${data.login}.</p>`);
 				} else {
-					erlogin.innerHTML = '';
+					$erlogin.html('');
 					$erlogin.append(`<p style = "color: #FF0000;">Wrong login or password</p>`);
 					document.getElementById("erlogin").style.display = "block";
 				}
 			});
 			socket.on('add pos', function(data) {
 				if (data.flg){
-					$log.innerHTML = '';
-					$log.append(`<p>You logged as ${data.login}. You edit your world coodinate.</p>`);
+					document.getElementById("regForm").style.display = "none";
+					document.getElementById("logForm").style.display = "none";
+					document.getElementById("posForm").style.display = "block";
+					document.getElementById("erreg").style.display = "none";
+					document.getElementById("erlogin").style.display = "none";
+					document.getElementById("login").style.display = "block";
+					document.getElementById("logout").style.display = "block";
+					// $log.html('');
+					// $log.append(`<p>You logged as ${data.login}. You edit your world coodinate.</p>`);
 				}
 			})
 
